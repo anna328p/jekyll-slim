@@ -1,11 +1,11 @@
 module Jekyll
   module Slim
     class Converter < ::Jekyll::Converter
-      safe false
+      safe true
       priority :low
 
       def matches(ext)
-        ext.downcase == '.slim'
+        ext =~ /slim/i
       end
 
       def output_ext(ext)
@@ -16,9 +16,13 @@ module Jekyll
         self.class.convert(@config, content)
       end
 
-      def self.convert(config, content)
+      def self.convert config, content
         config = config['slim'] || {}
-        ::Sliquid::Converter.new(config) { content }.render(Object.new)
+        config.keys.each do |k|
+          config[k.to_sym] = config.delete k
+        end
+
+        ::Slim::Template.new(config){ content }.render
       end
     end
   end
