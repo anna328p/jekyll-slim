@@ -16,13 +16,9 @@ module Jekyll
         self.class.convert(@config, content)
       end
 
-      def self.convert config, content
-        config = config['slim'] || {}
-        config.keys.each do |k|
-          config[k.to_sym] = config.delete k
-        end
-
-        ::Slim::Template.new(config){ content }.render
+      def self.convert(full_config, content, context = {})
+        config = ::Jekyll::Utils.symbolize_hash_keys(full_config['slim'] || {})
+        ::Slim::Template.new(config){ content }.render(DataProvider.new(context: context, config: full_config))
       end
     end
   end

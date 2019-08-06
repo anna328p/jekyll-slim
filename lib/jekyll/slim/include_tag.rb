@@ -4,7 +4,7 @@ module Jekyll
       def read_file(file, context)
         content = super
         if file =~ /\.slim\Z/i
-          Converter.convert(context.registers[:site].config, content)
+          Converter.convert(context.registers[:site].config, content, include: parse_params(context))
         else
           content
         end
