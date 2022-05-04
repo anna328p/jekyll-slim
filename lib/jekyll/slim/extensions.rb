@@ -7,13 +7,8 @@ module Jekyll
       self.content = transform
     end
 
-    def transform
-      _renderer.convert(content)
-    end
-
     def extname
       ext
     end
   end
 end
-
