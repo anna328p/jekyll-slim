@@ -1,8 +1,10 @@
+require 'delegate'
+
 module Jekyll
   module Slim
     class DataProvider
 
-      class PseudoLiquidWrapper < SimpleDelegator
+      class PseudoLiquidWrapper < ::SimpleDelegator
         def method_missing(method, *args, &block)
           return super if !args.empty? || block_given?
           object = __getobj__
