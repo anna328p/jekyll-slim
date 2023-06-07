@@ -3,10 +3,14 @@ module Jekyll
     class IncludeTag < Jekyll::Tags::IncludeTag
       def read_file(file, context)
         content = super
-        if file =~ /\.slim\Z/i
-          Converter.convert(context.registers[:site].config, content, include: parse_params(context))
+        return content unless file =~ /\.slim\Z/i
+
+        config = context.registers[:site].config
+
+        if @params
+          Converter.convert(config, content, include: parse_params(context))
         else
-          content
+          Converter.convert(config, content)
         end
       end
     end
