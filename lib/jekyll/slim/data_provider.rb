@@ -6,25 +6,29 @@ module Jekyll
 
       class PseudoLiquidWrapper < ::SimpleDelegator
         def method_missing(method, *args, &block)
-          return super if !args.empty? || block_given?
+          return super if args.any? || block_given?
+
           object = __getobj__
           liquid = object.to_liquid
-          result =
-            if liquid.respond_to?(:[]) && liquid.respond_to?(:key?) &&
-                (liquid.key?(method.to_s) || liquid.key?(method))
-              liquid[method.to_s] || liquid[method]
-            else
-              super
-            end
-          if result.respond_to?(:[]) && !result.is_a?(String)
-            result =
-              if result.is_a?(Array)
-                result.map { |item| PseudoLiquidWrapper.new(item) }
-              else
-                PseudoLiquidWrapper.new(result)
-              end
-          end
+
+          acts_like_hash = liquid.respond_to?(:[]) && liquid.respond_to?(:key?)
+
+          result = self.class.get_by_key(liquid, method) if acts_like_hash
+          result ||= super
+
+          return result.map { PseudoLiquidWrapper.new(_1) } if result.is_a?(Array)
+
+          acts_like_array = result.respond_to?(:[]) && !result.is_a?(String)
+          return PseudoLiquidWrapper.new(result) if acts_like_array
+
           result
+        end
+
+        def self.get_by_key(obj, key)
+          return obj[key.to_s] if obj.key?(key.to_s)
+          return obj[key] if obj.key?(key)
+
+          nil
         end
       end
 
